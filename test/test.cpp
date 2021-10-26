@@ -3,11 +3,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(TestCaseName, TestName) {
-  EXPECT_EQ(1, 1);
-  EXPECT_TRUE(true);
-}
-
 TEST(Monomial, Constructor)
 {
 	monomial testing_monomial(1, 1);
@@ -172,7 +167,7 @@ TEST(Polynomial, OperatorMultiply)
 
 	polynomial multiplying_polynomial;
 	multiplying_polynomial = testing_polynomial * 4;
-	testing_polynomial = testing_polynomial * 5;
+	testing_polynomial = 5 * testing_polynomial;
 
 	EXPECT_EQ(multiplying_polynomial[5], 4);
 	EXPECT_EQ(testing_polynomial[5], 5);
