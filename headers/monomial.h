@@ -1,58 +1,61 @@
 #pragma once
-
 //Класс одночлена с полем коэффициент, степень и указатель на следующий одночлен
 //Дружественный класс-список - многочлен
 //конструктор по умолчанию, сеттеры и геттеры.
 
+template <typename TYPE>
 class monomial
 {
 private:
-	double _factor;
+	TYPE _factor;
 	size_t _power;
 	monomial* _next;
 	friend class polynomial;
 public:
-	monomial(double factor, const size_t& power);
-	void set(double factor, const size_t& power);
+	monomial(const TYPE& factor, const size_t& power);
+	void set(const TYPE& factor, const size_t& power);
 	size_t getPower() const;
-	double& getFactor();
-	double getFactor() const;
+	TYPE& getFactor();
+	TYPE getFactor() const;
 	monomial* next() const;
 };
 
-inline monomial::monomial(double factor, const size_t& power)
+template <typename TYPE>
+inline monomial<TYPE>::monomial(const TYPE& factor, const size_t& power)
+{
+	_factor = factor;
+
+}
+
+template <typename TYPE>
+inline void monomial<TYPE>::set(const TYPE& factor, const size_t& power)
 {
 	if (power < 0) throw "Power can not be less than 0";
 
 	_factor = factor;
 	_power = power;
-	_next = nullptr;
 }
 
-inline void monomial::set(double factor, const size_t& power)
-{
-	if (power < 0) throw "Power can not be less than 0";
-
-	_factor = factor;
-	_power = power;
-}
-
-inline size_t monomial::getPower() const
+template <typename TYPE>
+inline size_t monomial<TYPE>::getPower() const
 {
 	return _power;
 }
 
-inline double& monomial::getFactor()
+template <typename TYPE>
+inline TYPE& monomial<TYPE>::getFactor()
 {
 	return _factor;
 }
 
-inline double monomial::getFactor() const
+template <typename TYPE>
+inline TYPE monomial<TYPE>::getFactor() const
 {
 	return _factor;
 }
 
-inline monomial* monomial::next() const
+template <typename TYPE>
+inline monomial<TYPE>* monomial<TYPE>::next() const
 {
 	return _next;
 }
