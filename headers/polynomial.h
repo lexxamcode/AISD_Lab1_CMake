@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <ctime>
 #include <random>
+#include <complex>
 #include "monomial.h"
 
 //Класс многочлен в виде односвязного списка полями "начало списка" и степень многочлена
@@ -14,71 +15,78 @@
 //Перегружен оператор [], +, -, =, *
 //Метод calculate() для подсчета выражения при заданном X
 
+template <typename TYPE>
 class polynomial
 {
 private:
-	monomial* _head;
+	monomial<TYPE>* _head;
 	size_t _N;
 public:
 	polynomial();
 	polynomial(const size_t& power);
-	polynomial(const polynomial& copied);
+	polynomial(const polynomial<TYPE>& copied);
 	~polynomial();
-	void add(monomial* part);
-	void add(const monomial& part);
+	void add(monomial<TYPE>* part);
+	void add(const monomial<TYPE>& part);
 	void remove(const size_t& power);
-	void set(double facor, const size_t& power);
+	void set(const TYPE& facor, const size_t& power);
 	size_t size() const;
-	monomial& get(const size_t& power);
-	monomial get(const size_t& power) const;
-	double operator [](const size_t& power) const;
-	double& operator [](const size_t& power);
+	monomial<TYPE>& get(const size_t& power);
+	monomial<TYPE> get(const size_t& power) const;
+	TYPE operator [](const size_t& power) const;
+	TYPE& operator [](const size_t& power);
 	polynomial& randomize();
-	polynomial operator + (const polynomial& second) const;
-	polynomial& operator + (const polynomial& second);
-	polynomial const operator - (const polynomial& second) const;
-	polynomial& operator - (const polynomial& second);
-	polynomial& operator = (const polynomial& second);
-	polynomial operator * (const double& p_factor)const;
-	polynomial& operator * (const double& p_factor);
-	friend polynomial& operator *(const double& p_factor,const polynomial& pol);
-	double calculate(const double& x);
+	polynomial operator + (const polynomial<TYPE>& second) const;
+	polynomial& operator + (const polynomial<TYPE>& second);
+	polynomial const operator - (const polynomial<TYPE>& second) const;
+	polynomial& operator - (const polynomial<TYPE>& second);
+	polynomial& operator = (const polynomial<TYPE>& second);
+	polynomial operator * (const TYPE& p_factor)const;
+	polynomial& operator * (const TYPE& p_factor);
+	friend polynomial& operator *(const TYPE& p_factor, const polynomial<TYPE>& pol);
+	TYPE calculate(const TYPE& x) const;
 };
 
+template <typename TYPE>
+inline polynomial<TYPE>::polynomial() : _head(NULL), _N(0) { }
 
-inline polynomial::polynomial() : _head(NULL), _N(0) { }
-inline polynomial::polynomial(const size_t& power)
+template <typename TYPE>
+inline polynomial<TYPE>::polynomial(const size_t& power)
 {
 	_N = power;
-	_head = new monomial(1, 0);
+	_head = new monomial<TYPE>(1, 0);
 
 	for (size_t i = 1; i <= power; i++)
 	{
-		monomial* temp = new monomial(1, i);
+		monomial<TYPE>* temp = new monomial<TYPE>(static_cast<TYPE>(1), i);
 		add(temp);
 	}
 }
-inline polynomial::polynomial(const polynomial& copied)
+
+template <typename TYPE>
+inline polynomial<TYPE>::polynomial(const polynomial<TYPE>& copied)
 {
 	_N = copied._N;
 	_head = nullptr;
 
-	monomial* cur = copied._head;
+	monomial<TYPE>* cur = copied._head;
 
 	while (cur)
 	{
-		monomial* adding = new monomial(cur->_factor, cur->_power);
+		monomial<TYPE>* adding = new monomial<TYPE>(cur->_factor, cur->_power);
 		adding->_next = _head;
 		_head = adding;
 
 		cur = cur->_next;
 	}
 }
-inline polynomial::~polynomial()
+
+template <typename TYPE>
+inline polynomial<TYPE>::~polynomial()
 {
 	_N = 0;
 
-	monomial* temp;
+	monomial<TYPE>* temp;
 
 	while (_head)
 	{
@@ -88,7 +96,8 @@ inline polynomial::~polynomial()
 	}
 }
 
-inline void polynomial::add(monomial* part)
+template <typename TYPE>
+inline void polynomial<TYPE>::add(monomial<TYPE>* part)
 {
 	part->_next = _head;
 	_head = part;
@@ -97,9 +106,11 @@ inline void polynomial::add(monomial* part)
 		_N = part->_power;
 
 }
-inline void polynomial::add(const monomial& part)
+
+template <typename TYPE>
+inline void polynomial<TYPE>::add(const monomial<TYPE>& part)
 {
-	monomial* temp = new monomial(part._factor, part._power);
+	monomial<TYPE>* temp = new monomial<TYPE>(part._factor, part._power);
 
 	temp->_next = _head;
 	_head = temp;
@@ -108,11 +119,12 @@ inline void polynomial::add(const monomial& part)
 		_N = part._power;
 }
 
-inline void polynomial::remove(const size_t& power)
+template <typename TYPE>
+inline void polynomial<TYPE>::remove(const size_t& power)
 {
 	if (&get(power) == _head)
 	{
-		monomial* temp = _head;
+		monomial<TYPE>* temp = _head;
 		_head = _head->_next;
 		delete temp;
 		if (power == _N)
@@ -120,8 +132,8 @@ inline void polynomial::remove(const size_t& power)
 	}
 	else
 	{
-		monomial* temp = _head;
-		monomial* next = temp->_next;
+		monomial<TYPE>* temp = _head;
+		monomial<TYPE>* next = temp->_next;
 		while (next)
 		{
 			if (next->_power == power)
@@ -138,7 +150,8 @@ inline void polynomial::remove(const size_t& power)
 	}
 }
 
-inline void polynomial::set(double factor, const size_t& power)
+template <typename TYPE>
+inline void polynomial<TYPE>::set(const TYPE& factor, const size_t& power)
 {
 	if (factor)
 	{
@@ -150,7 +163,7 @@ inline void polynomial::set(double factor, const size_t& power)
 		{
 			if (err == -1)
 			{
-				monomial* temp = new monomial(factor, power);
+				monomial<TYPE>* temp = new monomial<TYPE>(factor, power);
 				add(temp);
 			}
 		}
@@ -158,18 +171,19 @@ inline void polynomial::set(double factor, const size_t& power)
 		{
 			if (!strcmp(msg, "List is empty"))
 			{
-				monomial* temp = new monomial(factor, power);
+				monomial<TYPE>* temp = new monomial<TYPE>(factor, power);
 				add(temp);
 			}
 		}
 	}
 }
 
-inline monomial& polynomial::get(const size_t& power)
+template <typename TYPE>
+inline monomial<TYPE>& polynomial<TYPE>::get(const size_t& power)
 {
 	if (!_head) throw "List is empty";
 
-	monomial* temp = _head;
+	monomial<TYPE>* temp = _head;
 	if (!(power > _N))
 	{
 		while (temp)
@@ -181,18 +195,20 @@ inline monomial& polynomial::get(const size_t& power)
 			}
 			temp = temp->_next;
 		}
-		throw -1;
+		throw - 1;
 	}
 	else
 		throw - 1;
 }
-inline monomial polynomial::get(const size_t& power) const
+
+template <typename TYPE>
+inline monomial<TYPE> polynomial<TYPE>::get(const size_t& power) const
 {
 	if (!_head) throw "List is empty";
 
 	if (!(power > _N))
 	{
-		monomial* temp = _head;
+		monomial<TYPE>* temp = _head;
 		while (temp)
 		{
 			if (temp->_power == power)
@@ -202,18 +218,20 @@ inline monomial polynomial::get(const size_t& power) const
 			}
 			temp = temp->_next;
 		}
-		return monomial(0, power);
+		return monomial(static_cast<TYPE>(0), power);
 	}
 	else
-		return monomial(0, power);
+		return monomial(static_cast<TYPE>(0), power);
 }
 
-inline size_t polynomial::size() const
+template <typename TYPE>
+inline size_t polynomial<TYPE>::size() const
 {
 	return _N;
 }
 
-inline double polynomial::operator [] (const size_t& power) const
+template <typename TYPE>
+inline TYPE polynomial<TYPE>::operator [] (const size_t& power) const
 {
 	if (!_head) throw "List is empty";
 
@@ -221,7 +239,7 @@ inline double polynomial::operator [] (const size_t& power) const
 		return 0;
 	else
 	{
-		monomial* temp = _head;
+		monomial<TYPE>* temp = _head;
 		while (temp)
 		{
 			if (temp->_power == power)
@@ -235,13 +253,15 @@ inline double polynomial::operator [] (const size_t& power) const
 
 	return 0;
 }
-inline double& polynomial::operator[](const size_t& power)
+
+template <typename TYPE>
+inline TYPE& polynomial<TYPE>::operator[](const size_t& power)
 {
 	if (!_head) throw "List is empty";
 
 	if (power <= _N)
 	{
-		monomial* temp = _head;
+		monomial<TYPE>* temp = _head;
 		while (temp)
 		{
 			if (temp->_power == power)
@@ -256,15 +276,16 @@ inline double& polynomial::operator[](const size_t& power)
 	throw - 1;
 }
 
-inline polynomial& polynomial::randomize()
+template <typename TYPE>
+inline polynomial<TYPE>& polynomial<TYPE>::randomize()
 {
 	srand((unsigned)time((0)));
 
-	polynomial* generated = new polynomial;
+	polynomial<TYPE>* generated = new polynomial<TYPE>;
 	size_t N = static_cast<size_t>(1) + rand() % 10;
 	for (int i = 0; i < N; i++)
 	{
-		double factor = static_cast<double>(-100) + rand() % 100;
+		TYPE factor = static_cast<TYPE>(-100) + rand() % 100;
 		unsigned degree = 1 + rand() % 10;
 		int sign = 1 + rand() % 2;
 		if (sign == 1)
@@ -277,22 +298,23 @@ inline polynomial& polynomial::randomize()
 
 }
 
-inline polynomial polynomial::operator+(const polynomial& second) const
+template <typename TYPE>
+inline polynomial<TYPE> polynomial<TYPE>::operator+(const polynomial<TYPE>& second) const
 {
-	polynomial result;
+	polynomial<TYPE> result;
 
 	if (_N >= second._N)
 	{
 		for (size_t i = 0; i <= _N; i++)
 		{
-			double ai, bi;
+			TYPE ai, bi;
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -300,11 +322,11 @@ inline polynomial polynomial::operator+(const polynomial& second) const
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
-			if ((ai + bi) != 0)
+			if ((ai + bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai + bi, i);
+				monomial<TYPE> temp(ai + bi, i);
 				result.add(temp);
 			}
 		}
@@ -315,14 +337,14 @@ inline polynomial polynomial::operator+(const polynomial& second) const
 	{
 		for (size_t i = 0; i <= second._N; i++)
 		{
-			double ai, bi;
+			TYPE ai, bi;
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -330,38 +352,40 @@ inline polynomial polynomial::operator+(const polynomial& second) const
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			if ((ai + bi) != 0)
 			{
-				monomial temp(ai + bi, i);
+				monomial<TYPE> temp(ai + bi, i);
 				result.add(temp);
 			}
 		}
 		return result;
 	}
 }
-inline polynomial& polynomial::operator + (const polynomial& second)
+
+template <typename TYPE>
+inline polynomial<TYPE>& polynomial<TYPE>::operator + (const polynomial<TYPE>& second)
 {
-	polynomial* result = new polynomial;
+	polynomial<TYPE>* result = new polynomial<TYPE>;
 
 	if (_N >= second._N)
 	{
 		for (size_t i = 0; i <= _N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -369,15 +393,15 @@ inline polynomial& polynomial::operator + (const polynomial& second)
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai + bi) != 0)
+			if ((ai + bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai + bi, i);
+				monomial<TYPE> temp(ai + bi, i);
 				(*result).add(temp);
 			}
 		}
@@ -388,19 +412,19 @@ inline polynomial& polynomial::operator + (const polynomial& second)
 	{
 		for (size_t i = 0; i <= second._N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				ai = 0;
+				ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -408,42 +432,44 @@ inline polynomial& polynomial::operator + (const polynomial& second)
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai + bi) != 0)
+			if ((ai + bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai + bi, i);
+				monomial<TYPE> temp(ai + bi, i);
 				(*result).add(temp);
 			}
 		}
 		return (*result);
 	}
 }
-inline polynomial const polynomial::operator - (const polynomial& second) const
+
+template <typename TYPE>
+inline polynomial<TYPE> const polynomial<TYPE>::operator - (const polynomial<TYPE>& second) const
 {
-	polynomial result;
+	polynomial<TYPE> result;
 
 	if (_N >= second._N)
 	{
 		for (size_t i = 0; i <= _N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				ai = 0;
+				ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -451,15 +477,15 @@ inline polynomial const polynomial::operator - (const polynomial& second) const
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai - bi) != 0)
+			if ((ai - bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai - bi, i);
+				monomial<TYPE> temp(ai - bi, i);
 				result.add(temp);
 			}
 		}
@@ -470,19 +496,19 @@ inline polynomial const polynomial::operator - (const polynomial& second) const
 	{
 		for (size_t i = 0; i <= second._N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				ai = 0;
+				ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -490,42 +516,44 @@ inline polynomial const polynomial::operator - (const polynomial& second) const
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai - bi) != 0)
+			if ((ai - bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai - bi, i);
+				monomial<TYPE> temp(ai - bi, i);
 				result.add(temp);
 			}
 		}
 		return result;
 	}
 }
-inline polynomial& polynomial::operator - (const polynomial& second)
+
+template <typename TYPE>
+inline polynomial<TYPE>& polynomial<TYPE>::operator - (const polynomial<TYPE>& second)
 {
-	polynomial* result = new polynomial;
+	polynomial<TYPE>* result = new polynomial<TYPE>;
 
 	if (_N >= second._N)
 	{
 		for (size_t i = 0; i <= _N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				ai = 0;
+				ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -533,15 +561,15 @@ inline polynomial& polynomial::operator - (const polynomial& second)
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai - bi) != 0)
+			if ((ai - bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai - bi, i);
+				monomial<TYPE> temp(ai - bi, i);
 				(*result).add(temp);
 			}
 		}
@@ -552,19 +580,19 @@ inline polynomial& polynomial::operator - (const polynomial& second)
 	{
 		for (size_t i = 0; i <= second._N; i++)
 		{
-			double ai = 0;
-			double bi = 0;
+			TYPE ai = static_cast<TYPE>(0);
+			TYPE bi = static_cast<TYPE>(0);
 			try {
 				ai = (*this)[i];
 			}
 			catch (int err)
 			{
 				if (err == -1)
-					ai = 0;
+					ai = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				ai = 0;
+				ai = static_cast<TYPE>(0);
 			}
 			try {
 				bi = second[i];
@@ -572,29 +600,31 @@ inline polynomial& polynomial::operator - (const polynomial& second)
 			catch (int err)
 			{
 				if (err == -1)
-					bi = 0;
+					bi = static_cast<TYPE>(0);
 			}
 			catch (const char*)
 			{
-				bi = 0;
+				bi = static_cast<TYPE>(0);
 			}
-			if ((ai - bi) != 0)
+			if ((ai - bi) != static_cast<TYPE>(0))
 			{
-				monomial temp(ai - bi, i);
+				monomial<TYPE> temp(ai - bi, i);
 				(*result).add(temp);
 			}
 		}
 		return *result;
 	}
 }
-inline polynomial& polynomial::operator = (const polynomial& second)
+
+template <typename TYPE>
+inline polynomial<TYPE>& polynomial<TYPE>::operator = (const polynomial<TYPE>& second)
 {
 	if (this == &second)
 		return *this;
 
 	while (_head)
 	{
-		monomial* temp = _head;
+		monomial<TYPE>* temp = _head;
 		_head = _head->_next;
 		delete temp;
 	}
@@ -602,11 +632,11 @@ inline polynomial& polynomial::operator = (const polynomial& second)
 
 	_N = second._N;
 
-	monomial* cur = second._head;
+	monomial<TYPE>* cur = second._head;
 
 	while (cur)
 	{
-		monomial* adding = new monomial(cur->_factor, cur->_power);
+		monomial<TYPE>* adding = new monomial<TYPE>(cur->_factor, cur->_power);
 		adding->_next = _head;
 		_head = adding;
 
@@ -616,11 +646,12 @@ inline polynomial& polynomial::operator = (const polynomial& second)
 	return *this;
 }
 
-inline polynomial polynomial::operator *(const double& p_factor) const
+template <typename TYPE>
+inline polynomial<TYPE> polynomial<TYPE>::operator *(const TYPE& p_factor) const
 {
-	polynomial result(*this);
+	polynomial<TYPE> result(*this);
 
-	monomial* temp = result._head;
+	monomial<TYPE>* temp = result._head;
 
 	while (temp)
 	{
@@ -631,11 +662,12 @@ inline polynomial polynomial::operator *(const double& p_factor) const
 	return result;
 }
 
-inline polynomial& polynomial::operator*(const double& p_factor)
+template <typename TYPE>
+inline polynomial<TYPE>& polynomial<TYPE>::operator*(const TYPE& p_factor)
 {
-	polynomial* result = new polynomial;
+	polynomial<TYPE>* result = new polynomial<TYPE>;
 
-	monomial* temp = _head;
+	monomial<TYPE>* temp = _head;
 
 	while (temp)
 	{
@@ -648,11 +680,12 @@ inline polynomial& polynomial::operator*(const double& p_factor)
 	return *result;
 }
 
-inline polynomial& operator*(const double& p_factor, const polynomial& pol)
+template <typename TYPE>
+inline polynomial<TYPE>& operator*(const TYPE& p_factor, const polynomial<TYPE>& pol)
 {
-	polynomial* result = new polynomial(pol);
+	polynomial<TYPE>* result = new polynomial<TYPE>(pol);
 
-	monomial* temp = result->_head;
+	monomial<TYPE>* temp = result->_head;
 
 	while (temp)
 	{
@@ -663,14 +696,15 @@ inline polynomial& operator*(const double& p_factor, const polynomial& pol)
 	return *result;
 }
 
-inline double polynomial::calculate(const double& x)
+template <typename TYPE>
+inline TYPE polynomial<TYPE>::calculate(const TYPE& x) const
 {
-	double result = 0;
-	monomial* temp = _head;
+	TYPE result = static_cast<TYPE>(0);
+	monomial<TYPE>* temp = _head;
 
 	while (temp)
 	{
-		result += temp->_factor * pow(x, (double)temp->_power);
+		result += temp->_factor * pow(x, static_cast<TYPE>(temp)->_power);
 		temp = temp->_next;
 	}
 

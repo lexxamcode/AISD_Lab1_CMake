@@ -10,6 +10,7 @@ private:
 	TYPE _factor;
 	size_t _power;
 	monomial* _next;
+	template <typename N_TYPE>
 	friend class polynomial;
 public:
 	monomial(const TYPE& factor, const size_t& power);
@@ -24,7 +25,8 @@ template <typename TYPE>
 inline monomial<TYPE>::monomial(const TYPE& factor, const size_t& power)
 {
 	_factor = factor;
-
+	_power = power;
+	_next = nullptr;
 }
 
 template <typename TYPE>
