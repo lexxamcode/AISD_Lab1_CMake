@@ -153,7 +153,7 @@ inline void polynomial<TYPE>::remove(const size_t& power)
 template <typename TYPE>
 inline void polynomial<TYPE>::set(const TYPE& factor, const size_t& power)
 {
-	if (factor)
+	if (factor != static_cast<TYPE>(0))
 	{
 		try
 		{
@@ -176,6 +176,8 @@ inline void polynomial<TYPE>::set(const TYPE& factor, const size_t& power)
 			}
 		}
 	}
+	else
+		remove(power);
 }
 
 template <typename TYPE>
@@ -704,7 +706,7 @@ inline TYPE polynomial<TYPE>::calculate(const TYPE& x) const
 
 	while (temp)
 	{
-		result += temp->_factor * pow(x, static_cast<TYPE>(temp)->_power);
+		result += temp->_factor * static_cast<TYPE>(pow(x, temp->_power));
 		temp = temp->_next;
 	}
 
