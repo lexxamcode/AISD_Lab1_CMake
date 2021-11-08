@@ -122,30 +122,33 @@ inline void polynomial<TYPE>::add(const monomial<TYPE>& part)
 template <typename TYPE>
 inline void polynomial<TYPE>::remove(const size_t& power)
 {
-	if (&get(power) == _head)
+	if (this->_head)
 	{
-		monomial<TYPE>* temp = _head;
-		_head = _head->_next;
-		delete temp;
-		if (power == _N)
-			_N--;
-	}
-	else
-	{
-		monomial<TYPE>* temp = _head;
-		monomial<TYPE>* next = temp->_next;
-		while (next)
+		if (&get(power) == _head)
 		{
-			if (next->_power == power)
+			monomial<TYPE>* temp = _head;
+			_head = _head->_next;
+			delete temp;
+			if (power == _N)
+				_N--;
+		}
+		else
+		{
+			monomial<TYPE>* temp = _head;
+			monomial<TYPE>* next = temp->_next;
+			while (next)
 			{
-				temp->_next = next->_next;
-				delete next;
-				if (power == _N)
-					_N--;
-				break;
+				if (next->_power == power)
+				{
+					temp->_next = next->_next;
+					delete next;
+					if (power == _N)
+						_N--;
+					break;
+				}
+				temp = temp->_next;
+				next = next->_next;
 			}
-			temp = temp->_next;
-			next = next->_next;
 		}
 	}
 }
@@ -287,7 +290,7 @@ inline polynomial<TYPE>& polynomial<TYPE>::randomize()
 	size_t N = static_cast<size_t>(1) + rand() % 10;
 	for (int i = 0; i < N; i++)
 	{
-		TYPE factor = static_cast<TYPE>(-100) + rand() % 100;
+		TYPE factor = -100 + static_cast<TYPE>(rand()) / (static_cast<TYPE>(RAND_MAX / (100 - (-100))));
 		unsigned degree = 1 + rand() % 10;
 		int sign = 1 + rand() % 2;
 		if (sign == 1)
@@ -298,6 +301,59 @@ inline polynomial<TYPE>& polynomial<TYPE>::randomize()
 
 	return *generated;
 
+}
+inline polynomial<std::complex<float>>& polynomial<std::complex<float>>::randomize()
+{
+	srand((unsigned)time((0)));
+
+	polynomial<std::complex<float>>* generated = new polynomial<std::complex<float>>;
+	size_t N = static_cast<size_t>(1) + rand() % 10;
+	for (int i = 0; i < N; i++)
+	{
+		float r_factor = -100 + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (100 - (-100))));
+		float i_factor = -100 + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (100 - (-100))));
+		unsigned degree = 1 + rand() % 10;
+		int sign = 1 + rand() % 2;
+		if (sign == 1)
+		{
+			std::complex<float> factor(r_factor, i_factor);
+			generated->set(factor, degree);
+		}
+		else
+		{
+			std::complex<float> factor(-1*(r_factor), -1*(i_factor));
+			generated->set(factor, degree);
+		}
+	}
+
+	return *generated;
+}
+
+inline polynomial<std::complex<double>>& polynomial<std::complex<double>>::randomize()
+{
+	srand((unsigned)time((0)));
+
+	polynomial<std::complex<double>>* generated = new polynomial<std::complex<double>>;
+	size_t N = static_cast<size_t>(1) + rand() % 10;
+	for (int i = 0; i < N; i++)
+	{
+		double r_factor = -100 + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX / (100 - (-100))));
+		double i_factor = -100 + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX / (100 - (-100))));
+		unsigned degree = 1 + rand() % 10;
+		int sign = 1 + rand() % 2;
+		if (sign == 1)
+		{
+			std::complex<double> factor(r_factor, i_factor);
+			generated->set(factor, degree);
+		}
+		else
+		{
+			std::complex<double> factor(-1 * (r_factor), -1 * (i_factor));
+			generated->set(factor, degree);
+		}
+	}
+
+	return *generated;
 }
 
 template <typename TYPE>
