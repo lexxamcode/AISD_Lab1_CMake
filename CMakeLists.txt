@@ -19,8 +19,6 @@ target_link_libraries(test_list PRIVATE gtest gtest_main)
 
 if (MSVC)
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-	message("COMPILER IS MSVC!")
-	message(${gtest_force_shared_crt})
 	target_compile_options(Lab PRIVATE /W4)
 	target_compile_options(test_list PRIVATE /W4)
 else()
