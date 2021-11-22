@@ -1,35 +1,46 @@
-#pragma once
+п»ї#pragma once
+//ГЉГ«Г Г±Г± Г®Г¤Г­Г®Г·Г«ГҐГ­Г  Г± ГЇГ®Г«ГҐГ¬ ГЄГ®ГЅГґГґГЁГ¶ГЁГҐГ­ГІ, Г±ГІГҐГЇГҐГ­Гј ГЁ ГіГЄГ Г§Г ГІГҐГ«Гј Г­Г  Г±Г«ГҐГ¤ГіГѕГ№ГЁГ© Г®Г¤Г­Г®Г·Г«ГҐГ­
+//Г„Г°ГіГ¦ГҐГ±ГІГўГҐГ­Г­Г»Г© ГЄГ«Г Г±Г±-Г±ГЇГЁГ±Г®ГЄ - Г¬Г­Г®ГЈГ®Г·Г«ГҐГ­
+//ГЄГ®Г­Г±ГІГ°ГіГЄГІГ®Г° ГЇГ® ГіГ¬Г®Г«Г·Г Г­ГЁГѕ, Г±ГҐГІГІГҐГ°Г» ГЁ ГЈГҐГІГІГҐГ°Г».
 
-//Класс одночлена с полем коэффициент, степень и указатель на следующий одночлен
-//Дружественный класс-список - многочлен
-//конструктор по умолчанию, сеттеры и геттеры.
-
+template <typename TYPE>
 class monomial
 {
 private:
-	double _factor;
+	TYPE _factor;
 	size_t _power;
 	monomial* _next;
+	template <typename N_TYPE>
 	friend class polynomial;
 public:
-	monomial(double factor, const size_t& power);
-	void set(double factor, const size_t& power);
+	monomial(const TYPE& factor, const size_t& power);
+	void set(const TYPE& factor, const size_t& power);
+	bool operator ==(const monomial<TYPE>& second);
 	size_t getPower() const;
-	double& getFactor();
-	double getFactor() const;
+	TYPE& getFactor();
+	TYPE getFactor() const;
 	monomial* next() const;
 };
 
-inline monomial::monomial(double factor, const size_t& power)
+template <typename TYPE>
+inline monomial<TYPE>::monomial(const TYPE& factor, const size_t& power)
 {
-	if (power < 0) throw "Power can not be less than 0";
-
 	_factor = factor;
 	_power = power;
 	_next = nullptr;
 }
 
-inline void monomial::set(double factor, const size_t& power)
+template<typename TYPE>
+inline bool monomial<TYPE>::operator ==(const monomial<TYPE>& second)
+{
+	if ((_factor == second._factor) && (_power == second._power))
+		return true;
+	
+	return false;
+}
+
+template <typename TYPE>
+inline void monomial<TYPE>::set(const TYPE& factor, const size_t& power)
 {
 	if (power < 0) throw "Power can not be less than 0";
 
@@ -37,23 +48,26 @@ inline void monomial::set(double factor, const size_t& power)
 	_power = power;
 }
 
-inline size_t monomial::getPower() const
+template <typename TYPE>
+inline size_t monomial<TYPE>::getPower() const
 {
 	return _power;
 }
 
-inline double& monomial::getFactor()
+template <typename TYPE>
+inline TYPE& monomial<TYPE>::getFactor()
 {
 	return _factor;
 }
 
-inline double monomial::getFactor() const
+template <typename TYPE>
+inline TYPE monomial<TYPE>::getFactor() const
 {
 	return _factor;
 }
 
-inline monomial* monomial::next() const
+template <typename TYPE>
+inline monomial<TYPE>* monomial<TYPE>::next() const
 {
 	return _next;
 }
-
