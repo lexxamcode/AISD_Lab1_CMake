@@ -475,9 +475,9 @@ public:
 
 	polynomial<TYPE>& operator*(const TYPE& p_factor)
 	{
-		polynomial<TYPE>* result = new polynomial<TYPE>;
+		polynomial<TYPE>* result = new polynomial<TYPE>(*this);
 
-		for (const monomial<TYPE> i : *this)
+		for (const monomial<TYPE>& i : *this)
 			result->set(i.getFactor() * p_factor, i.getPower());
 
 		return *result;
